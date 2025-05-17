@@ -14,10 +14,7 @@ const server = http.createServer(app);
 
 // CORS config — allow frontend origin with credentials (cookies)
 app.use(cors({
-  origin: [
-    "http://localhost:3000", 
-    "https://tm-stamurai.netlify.app" // Removed trailing slash
-  ],
+  origin: true,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
