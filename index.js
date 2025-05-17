@@ -13,12 +13,15 @@ const app = express();
 const server = http.createServer(app);
 
 // CORS config — allow frontend origin with credentials (cookies)
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: [
+    "http://localhost:3000", 
+    "https://tm-stamurai.netlify.app" // Removed trailing slash
+  ],
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
+}));
 
 // Built-in middleware for JSON parsing & cookie parsing
 app.use(express.json());
