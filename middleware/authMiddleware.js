@@ -46,11 +46,13 @@ const authMiddleware = async (req, res, next) => {
       );
 
       // Set the new access token as a secure HTTP-only cookie
-    res.cookie('accessToken', newAccessToken, {
+ // For both accessToken and refreshToken cookies
+res.cookie('accessToken', token, {
   httpOnly: true,
-  secure: true, // Force secure in production
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Adjust for cross-site
-  maxAge: 15 * 60 * 1000
+  secure: true, // Must be true in production
+  sameSite: 'none', // Required for cross-site cookies
+  maxAge: 15 * 60 * 1000,
+  domain: '.onrender.com' // Try with and without this
 });
       // Attach user ID from the refresh token to the request
       req.userId = decodedRefresh.userId;
