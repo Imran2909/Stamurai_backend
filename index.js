@@ -7,6 +7,7 @@ const taskRouter = require("./routes/taskRoute");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
@@ -14,7 +15,7 @@ const server = http.createServer(app);
 // CORS config — allow frontend origin with credentials (cookies)
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
