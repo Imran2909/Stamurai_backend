@@ -46,13 +46,12 @@ const authMiddleware = async (req, res, next) => {
       );
 
       // Set the new access token as a secure HTTP-only cookie
-      res.cookie('accessToken', newAccessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies only in production
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000 // 15 minutes in milliseconds
-      });
-
+    res.cookie('accessToken', newAccessToken, {
+  httpOnly: true,
+  secure: true, // Force secure in production
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Adjust for cross-site
+  maxAge: 15 * 60 * 1000
+});
       // Attach user ID from the refresh token to the request
       req.userId = decodedRefresh.userId;
 
