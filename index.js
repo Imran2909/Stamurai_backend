@@ -12,12 +12,15 @@ const app = express();
 const server = http.createServer(app);
 
 // CORS config — allow frontend origin with credentials (cookies)
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: [
+    "http://localhost:3000", 
+    "https://tm-stamurai.netlify.app" // Removed trailing slash
+  ],  
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
+}));
 
 // Built-in middleware for JSON parsing & cookie parsing
 app.use(express.json());
@@ -34,9 +37,9 @@ app.use("/user", userRouter);
 // Setup Socket.IO with CORS to match frontend
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
-    credentials: true,
-  },
+    origin: ["http://localhost:3000", "https://tm-stamurai.netlify.app"],
+    credentials: true
+  }
 });
 
 // Inject io into assignTaskRouter to enable socket event emission
@@ -54,7 +57,6 @@ const connectedUsers = new Map();
 
 // Socket.IO connection events
 io.on("connection", (socket) => {
-
   // Client joins a room named by their username
   socket.on("join", (username) => {
     socket.join(username);

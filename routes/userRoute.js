@@ -37,8 +37,9 @@ const validateSignupInput = (req, res, next) => {
   next();
 };
 
-// POST /signup — Create new user with validation & hashed password
-userRouter.post("/signup", validateSignupInput, async (req, res) => {
+//signup — Create new user with validation & hashed password
+
+ userRouter.post("/signup", validateSignupInput, async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
@@ -118,15 +119,15 @@ userRouter.post("/signup", validateSignupInput, async (req, res) => {
   }
 });
 
-// POST /login — Authenticate user, generate access & refresh tokens, set cookies
-userRouter.post('/login', async (req, res) => {
+// POST /login — Authenticate user, generate access & refresh tokens, return tokens in JSON for frontend to store locally
+userRouter.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
 
     if (!username || !password) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: "Username and password are required"
+        message: "Username and password are required",
       });
     }
 
@@ -135,7 +136,7 @@ userRouter.post('/login', async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -144,7 +145,7 @@ userRouter.post('/login', async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid credentials"
+        message: "Invalid credentials",
       });
     }
 
@@ -152,31 +153,16 @@ userRouter.post('/login', async (req, res) => {
     const accessToken = jwt.sign(
       { userId: user._id },
       process.env.ACCESS_SECRET,
-      { expiresIn: '15m' }
+      { expiresIn: "15m" }
     );
-    
+
     const refreshToken = jwt.sign(
       { userId: user._id },
       process.env.REFRESH_SECRET,
-      { expiresIn: '7d' }
+      { expiresIn: "7d" }
     );
 
-    // Set tokens as httpOnly cookies for security
-    res.cookie('accessToken', accessToken, { 
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000 // 15 minutes
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
-    // Return tokens and user info in response JSON too (optional, handy for front-end)
+    // Instead of setting cookies, just return tokens in JSON response
     return res.status(200).json({
       success: true,
       message: "Login successful",
@@ -185,37 +171,26 @@ userRouter.post('/login', async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
-
   } catch (error) {
     console.error("Login error:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 });
 
-// POST /logout — Clear the JWT cookies to log out user
-userRouter.post('/logout', (req, res) => {
-
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/', // Must match the login cookie path
-  };
-
-  // Clear both access and refresh tokens from cookies
-  res.clearCookie('accessToken', cookieOptions);
-  res.clearCookie('refreshToken', cookieOptions);
-
+// POST /logout — Just respond success, frontend removes tokens from localStorage
+userRouter.post("/logout", (req, res) => {
+  // Since we don't use cookies anymore, logout is simply a client-side token removal
   return res.status(200).json({
     success: true,
-    message: "Logged out successfully"
+    message: "Logged out successfully",
   });
 });
+
 
 module.exports = userRouter;
