@@ -1,22 +1,20 @@
 const express = require("express");
-const http = require("http");
+const http = require("http"); 
 const { Server } = require("socket.io");
 const { connection } = require("./database/db");
-const userRouter = require("./routes/userRoute");
+const userRouter = require("./routes/userRoute"); 
 const taskRouter = require("./routes/taskRoute");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const authMiddleware = require("./middleware/authMiddleware");
+require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
 
 // CORS config — allow frontend origin with credentials (cookies)
 app.use(cors({
-  origin: [
-    "http://localhost:3000", 
-    "https://tm-stamurai.netlify.app" // Removed trailing slash
-  ],  
+  origin: true,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
@@ -37,9 +35,9 @@ app.use("/user", userRouter);
 // Setup Socket.IO with CORS to match frontend
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "https://tm-stamurai.netlify.app"],
-    credentials: true
-  }
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  },
 });
 
 // Inject io into assignTaskRouter to enable socket event emission
